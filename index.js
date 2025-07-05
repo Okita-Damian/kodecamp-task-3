@@ -1,13 +1,12 @@
 class ProvisionStore {
   #shopName;
-  #shopClass;
+  #shopLocation;
 
   products = [];
 
-  constructor(shopName, location, shopClass, products = []) {
+  constructor(shopName, location, products = []) {
     this.#shopName = shopName;
-    this.#shopClass = shopClass;
-    this.location = location;
+    this.#shopLocation = location;
 
     this.products = products.map((product) => {
       return {
@@ -20,16 +19,35 @@ class ProvisionStore {
     });
   }
 
-  // methods that return the list of products
+  //  Get the  shop name
+  getShopName() {
+    return this.#shopName;
+  }
+
+  //  Get the shop location
+  getShopLocation() {
+    return this.#shopLocation;
+  }
+
+  updateShopLocation(newLocation) {
+    if (!newLocation || typeof newLocation !== "string") {
+      return "invalid location";
+    }
+    this.#shopLocation = newLocation;
+    return "shop location updated";
+  }
+
+  // Return the list of products
   listProducts() {
     return this.products;
   }
 
-  // get product by id
+  // Get product by ID
   getProductById(id) {
     return this.products.find((p) => p.id === id) || null;
   }
-  // add new product
+
+  // Add a new product
   addProduct({ name, cost, stockStatus }) {
     const newProduct = {
       name,
@@ -41,29 +59,30 @@ class ProvisionStore {
     this.products.push(newProduct);
     return { message: "product added", newProduct };
   }
-  // edit a products properties by ID
+
+  // Edit a product by ID
   editProductById(id, newValues) {
     const product = this.getProductById(id);
     if (!product) return "product not found";
 
     if (newValues.name) product.name = newValues.name;
     if (newValues.cost) product.cost = newValues.cost;
-    return "product editted";
+    return "product edited";
   }
 
-  //  edit the stockStatus
+  // Update stock status by ID
   updatesStockStatus(id, newStatus) {
-    const status = this.getProductById(id);
-    if (!status) return "product not found";
+    const product = this.getProductById(id);
+    if (!product) return "product not found";
 
     const validStatus = ["In Stock", "Low Stock", "Out of Stock"];
     if (!validStatus.includes(newStatus)) return "Invalid stock status";
 
-    status.stockStatus = newStatus;
+    product.stockStatus = newStatus;
     return "stock updated";
   }
 
-  // delete product by ID
+  // Delete product by ID
   deleteProductById(id) {
     const index = this.products.findIndex((p) => p.id === id);
     if (index === -1) return "product not found";
@@ -73,13 +92,23 @@ class ProvisionStore {
   }
 }
 
-const store = new ProvisionStore("Sparrow's Autor's", "Anambra", "S");
+// =========================
+// 🏁🏁🏁🚨🚨 Example Usage
+// =========================
+
+const store = new ProvisionStore("Sparrow's Autos", "Anambra");
 
 const result = store.addProduct({
   name: "DashboardCover",
   cost: "5,000",
   stockStatus: "In Stock",
 });
+
+// updated location
+const updatedLocation = store.updateShopLocation("Lagos");
+
+// shopLocation
+const location = store.getShopLocation();
 
 // Get products
 const getStock = store.getProductById(result.newProduct.id);
@@ -93,15 +122,15 @@ const editStock = store.editProductById(result.newProduct.id, {
 // Update stock status
 const updateStock = store.updatesStockStatus(result.newProduct.id, "Low Stock");
 
+// delete
+const deleteStock = store.deleteProductById(result.newProduct.id);
+
 // Logs
-console.log("All Products:", store.listProducts());
+
+console.log("shop location:", location);
+console.log("New location:", updatedLocation);
 console.log("Get Product:", getStock);
 console.log("Edit Result:", editStock);
 console.log("Stock Update:", updateStock);
-
-// delete
-const deleteStock = store.deleteProductById(result.newProduct.id);
 console.log("Delete Result:", deleteStock);
-
-// Final product list
-console.log("Final Products:", store.listProducts());
+console.log("All Products:", store.listProducts());
