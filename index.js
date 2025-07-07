@@ -99,7 +99,7 @@ class ProvisionStore {
 const store = new ProvisionStore("Sparrow's Autos", "Anambra");
 
 const result = store.addProduct({
-  name: "DashboardCover",
+  productName: "DashboardCover",
   cost: "5,000",
   stockStatus: "In Stock",
 });
@@ -115,7 +115,7 @@ const getStock = store.getProductById(result.newProduct.id);
 
 // Edit product
 const editStock = store.editProductById(result.newProduct.id, {
-  name: "Car Mirrors",
+  productName: "Car Mirrors",
   cost: "7,990",
 });
 
