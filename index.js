@@ -48,9 +48,9 @@ class ProvisionStore {
   }
 
   // Add a new product
-  addProduct({ name, cost, stockStatus }) {
+  addProduct({ productName, cost, stockStatus }) {
     const newProduct = {
-      name,
+      productName,
       cost,
       stockStatus,
       createdAt: new Date().toISOString(),
@@ -65,7 +65,7 @@ class ProvisionStore {
     const product = this.getProductById(id);
     if (!product) return "product not found";
 
-    if (newValues.name) product.name = newValues.name;
+    if (newValues.productName) product.productName = newValues.productName;
     if (newValues.cost) product.cost = newValues.cost;
     return "product edited";
   }
