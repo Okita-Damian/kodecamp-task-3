@@ -1,22 +1,13 @@
 class ProvisionStore {
   #shopName;
-  #shopLocation;
+  #location;
 
   products = [];
 
-  constructor(shopName, location, products = []) {
+  constructor(shopName, location) {
     this.#shopName = shopName;
-    this.#shopLocation = location;
-
-    this.products = products.map((product) => {
-      return {
-        name: product.name,
-        cost: product.cost,
-        stockStatus: product.stockStatus,
-        createdAt: new Date().toISOString(),
-        id: Math.floor(Math.random() * 100000),
-      };
-    });
+    this.#location = location;
+    this.products = [];
   }
 
   //  Get the  shop name
@@ -25,16 +16,22 @@ class ProvisionStore {
   }
 
   //  Get the shop location
-  getShopLocation() {
-    return this.#shopLocation;
+  getLocation() {
+    return this.#location;
   }
 
-  updateShopLocation(newLocation) {
+  updateLocation(newLocation) {
     if (!newLocation || typeof newLocation !== "string") {
-      return "invalid location";
+      return {
+        success: false,
+        message: "invalide location",
+      };
     }
-    this.#shopLocation = newLocation;
-    return "shop location updated";
+    this.#location = newLocation;
+    return {
+      success: true,
+      message: "shop location updated successfully",
+    };
   }
 
   // Return the list of products
@@ -49,46 +46,94 @@ class ProvisionStore {
 
   // Add a new product
   addProduct({ productName, cost, stockStatus }) {
+    const validStatus = ["in-stock", "low-stock", "out-of-stock"];
+    const normalized = stockStatus.toLowerCase();
+    if (!validStatus.includes(normalized)) {
+      return {
+        success: false,
+        message:
+          "Invalid stock status. Use in-stock, low-stock, or out-of-stock.",
+      };
+    }
+
     const newProduct = {
       productName,
-      cost,
-      stockStatus,
+      cost: parseFloat(cost.toString().replace(/,/g, "")),
+      stockStatus: normalized,
       createdAt: new Date().toISOString(),
       id: Math.floor(Math.random() * 100000),
     };
     this.products.push(newProduct);
-    return { message: "product added", newProduct };
+    return {
+      success: true,
+      message: "product added successfully",
+      newProduct,
+    };
   }
 
   // Edit a product by ID
   editProductById(id, newValues) {
     const product = this.getProductById(id);
-    if (!product) return "product not found";
+    if (!product) {
+      return {
+        success: false,
+        message: "product not found",
+      };
+    }
 
     if (newValues.productName) product.productName = newValues.productName;
-    if (newValues.cost) product.cost = newValues.cost;
-    return "product edited";
+    if (newValues.cost)
+      product.cost = parseFloat(newValues.cost.toString().replace(/,/g, ""));
+    return {
+      success: true,
+      message: "product edited successfully",
+      data: product,
+    };
   }
 
   // Update stock status by ID
-  updatesStockStatus(id, newStatus) {
+  updateStockStatus(id, newStatus) {
     const product = this.getProductById(id);
-    if (!product) return "product not found";
+    if (!product) {
+      return {
+        success: false,
+        message: "product not found",
+      };
+    }
 
-    const validStatus = ["In Stock", "Low Stock", "Out of Stock"];
-    if (!validStatus.includes(newStatus)) return "Invalid stock status";
+    const validStatus = ["in-stock", "low-stock", "out-of-stock"];
+    const normalized = newStatus.toLowerCase();
+    if (!validStatus.includes(normalized)) {
+      return {
+        success: false,
+        message:
+          "Invalid stock status. Use in-stock, low-stock, or out-of-stock.",
+      };
+    }
 
-    product.stockStatus = newStatus;
-    return "stock updated";
+    product.stockStatus = normalized;
+    return {
+      success: true,
+      message: "stock updated successfully",
+      data: product,
+    };
   }
 
   // Delete product by ID
   deleteProductById(id) {
     const index = this.products.findIndex((p) => p.id === id);
-    if (index === -1) return "product not found";
-
-    this.products.splice(index, 1);
-    return "product deleted";
+    if (index === -1) {
+      return {
+        success: false,
+        message: "product not found",
+      };
+    }
+    const deleted = this.products.splice(index, 1)[0];
+    return {
+      success: true,
+      message: "product deleted successfully",
+      data: deleted,
+    };
   }
 }
 
@@ -101,14 +146,14 @@ const store = new ProvisionStore("Sparrow's Autos", "Anambra");
 const result = store.addProduct({
   productName: "DashboardCover",
   cost: "5,000",
-  stockStatus: "In Stock",
+  stockStatus: "in-stock",
 });
 
 // updated location
-const updatedLocation = store.updateShopLocation("Lagos");
+const updatedLocation = store.updateLocation("Lagos");
 
 // shopLocation
-const location = store.getShopLocation();
+const location = store.getLocation();
 
 // Get products
 const getStock = store.getProductById(result.newProduct.id);
@@ -120,14 +165,14 @@ const editStock = store.editProductById(result.newProduct.id, {
 });
 
 // Update stock status
-const updateStock = store.updatesStockStatus(result.newProduct.id, "Low Stock");
+const updateStock = store.updateStockStatus(result.newProduct.id, "low-stock");
 
 // delete
 const deleteStock = store.deleteProductById(result.newProduct.id);
 
 // Logs
 
-console.log("shop location:", location);
+console.log("location:", location);
 console.log("New location:", updatedLocation);
 console.log("Get Product:", getStock);
 console.log("Edit Result:", editStock);
